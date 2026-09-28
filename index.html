@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어2 1과 영영풀이 플래시카드 (81단어)</title>
+<style>
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: #f4f6f9; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .container { width: 100%; max-width: 520px; text-align: center; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: #475569; font-weight: 600; font-size: 0.95rem; }
+  .card { background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; user-select: none; }
+  .card:active { transform: scale(0.98); }
+  .badge { position: absolute; top: 18px; left: 20px; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: #e2e8f0; color: #334155; }
+  .badge.back { background: #dbeafe; color: #1d4ed8; }
+  .content { font-size: 1.35rem; font-weight: 600; color: #1e293b; line-height: 1.5; word-break: keep-all; }
+  .content.word { font-size: 2.1rem; font-weight: 800; color: #2563eb; }
+  .hint-box { margin-top: 18px; font-size: 0.95rem; color: #64748b; min-height: 24px; }
+  .controls { display: flex; gap: 10px; margin-top: 18px; justify-content: center; flex-wrap: wrap; }
+  button { border: none; border-radius: 12px; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; background: #e2e8f0; color: #334155; transition: background 0.15s; }
+  button:hover { background: #cbd5e1; }
+  button.primary { background: #2563eb; color: white; }
+  button.primary:hover { background: #1d4ed8; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span>영어2 1과 영영풀이</span>
+    <span id="counter">1 / 81</span>
+  </div>
+  <div class="card" id="card" onclick="flipCard()">
+    <span class="badge" id="sideBadge">영영풀이 (앞면)</span>
+    <div class="content" id="cardText"></div>
+    <div class="hint-box" id="hintText"></div>
+  </div>
+  <div class="controls">
+    <button onclick="prevCard()">◀ 이전</button>
+    <button onclick="showHint(event)">💡 힌트(한글 뜻)</button>
+    <button class="primary" onclick="nextCard()">다음 ▶</button>
+    <button onclick="shuffleCards()">🔀 섞기</button>
+  </div>
+</div>
+
+<script>
+const rawData = [
+  ["deadly", "adj. capable of causing death", "치명적인"],
+  ["bitterly", "adv. in an extreme and unpleasant manner", "몹시, 지독하게"],
+  ["fiercely", "adv. in an aggressive and powerful manner", "맹렬하게, 사납게"],
+  ["figure", "n. a person", "인물, 사람"],
+  ["emerge", "v. to come out into sight", "나타나다, 모습을 드러내다"],
+  ["laboratory", "n. a room or building equipped for scientific experimentation or analysis", "실험실, 연구실"],
+  ["set out", "to begin a journey", "출발하다, 나서다"],
+  ["collapse", "v. to quickly lose power, significance, usefulness, or value", "붕괴하다, 무너지다"],
+  ["widespread", "adj. occurring across a large area", "광범위한, 널리 퍼진"],
+  ["despair", "n. a feeling of great sorrow and hopelessness", "절망"],
+  ["ruin", "v. to destroy something completely", "망치다, 파괴하다"],
+  ["faint", "adj. so weak that it is difficult to perceive", "희미한, 미약한"],
+  ["tragic", "adj. characterized by sadness and suffering", "비극적인"],
+  ["desperate", "adj. with little hope", "절망적인, 필사적인"],
+  ["unemployed", "adj. without a job despite being capable of working", "실직한, 무직의"],
+  ["struggle", "v. to attempt to do something with difficulty", "애쓰다, 고군분투하다"],
+  ["hold on to", "to keep possession of something and refuse to give it up", "~을 붙잡다, 유지하다"],
+  ["bacterial", "adj. caused by or related to bacteria", "세균성의, 박테리아의"],
+  ["characterize", "v. to be typical of a kind of person, place, or thing", "특징짓다"],
+  ["high-pitched", "adj. having a sound that is very high in tone", "(소리가) 고음의, 아주 높은"],
+  ["distinct", "adj. easily identifiable or clearly different", "뚜렷한, 분명한"],
+  ["terror", "n. powerful fear", "공포, 두려움 대상"],
+  ["contract", "v. to catch a disease or illness", "(병에) 걸리다"],
+  ["identify", "v. to find or discover something", "확인하다, 밝혀내다"],
+  ["vaccine", "n. a substance that helps the body fight a specific disease or illness", "백신"],
+  ["ineffective", "adj. unable to produce the desired results", "효과가 없는"],
+  ["fruitless", "adj. without any success", "성과 없는, 헛된"],
+  ["come along", "to make an appearance", "나타나다, 등장하다"],
+  ["bacteriology", "n. the study of bacteria", "세균학"],
+  ["recruit", "v. to find and persuade someone to join a company or organization", "채용하다, 모집하다"],
+  ["fellow", "adj. being in the same group, job, or situation as someone", "동료의"],
+  ["bond", "v. to form a strong relationship", "유대감을 형성하다, 가까워지다"],
+  ["serve as", "to play a certain role", "~의 역할을 하다"],
+  ["motivation", "n. the reason or need to do something", "동기"],
+  ["severe", "adj. very bad or harsh", "극심한, 심각한"],
+  ["eager", "adj. excited and willing to do something", "열망하는, 간절히 바라는"],
+  ["promote", "v. to work to make something happen or develop", "증진하다, 촉진하다"],
+  ["funding", "n. money to be used for a specific purpose", "자금, 재정 지원"],
+  ["duty", "n. tasks and responsibilities that arise from one's position", "업무, 의무"],
+  ["enthusiastic", "adj. interested and excited", "열정적인"],
+  ["persist", "v. to continue despite difficulties", "지속하다, 끈기 있게 계속하다"],
+  ["relieve", "v. to reduce discomfort or suffering", "(고통 등을) 덜어주다, 완화하다"],
+  ["innocent", "adj. pure and uncorrupted", "무고한, 순수한"],
+  ["process", "n. the steps taken to achieve something", "과정"],
+  ["incubator", "n. laboratory equipment used to create ideal conditions", "배양기"],
+  ["colony", "n. a group of organisms that live together", "(세균 등의) 군집, 콜로니"],
+  ["analyze", "v. to examine something in order to better understand it", "분석하다"],
+  ["dreadful", "adj. causing fear, extreme difficulty, or pain", "끔찍한, 지독한"],
+  ["victim", "n. someone who has been killed or harmed by something", "피해자, 희생자"],
+  ["urgent", "adj. requiring immediate attention", "긴급한, 시급한"],
+  ["potential", "adj. having the possibility of becoming something", "잠재적인, 가능성이 있는"],
+  ["clinical", "adj. relating to the treatment of patients", "임상의"],
+  ["trial", "n. a process or experiment that tests the quality, effectiveness, or usefulness of something", "시험, 실험"],
+  ["side effect", "an unintended negative result caused by medication", "부작용"],
+  ["inject", "v. to cause medication to directly enter someone's body", "주사하다, 주입하다"],
+  ["confirm", "v. to verify that something is true", "확인하다, 입증하다"],
+  ["conduct", "v. to organize and operate an activity", "수행하다, 실시하다"],
+  ["field test", "a test conducted in a real-world environment in which the product or service is intended to be used", "현장 시험"],
+  ["apparent", "adj. seeming to be true, but not yet proven", "분명해 보이는, 외관상의"],
+  ["determined", "adj. having a strong will to do something", "단호한, 결심한"],
+  ["expand", "v. to make larger in size or scope", "확장하다, 확대하다"],
+  ["proceed", "v. to continue carrying out a task that has already been started", "진행하다, 계속하다"],
+  ["unexpected", "adj. not anticipated or foreseen", "예상치 못한"],
+  ["infectious", "adj. capable of being spread from one person to another", "전염성의"],
+  ["enormous", "adj. extremely large", "막대한, 거대한"],
+  ["secure", "v. to acquire something through a large amount of effort", "확보하다"],
+  ["demonstrate", "v. to show a trait or ability clearly through proof or evidence", "보여주다, 입증하다"],
+  ["immunity", "n. the ability of the body to fight off a disease", "면역(력)"],
+  ["distribute", "v. to give out to a large number of people", "배포하다, 보급하다"],
+  ["decline", "n. a continuous decrease in the number, value, quality, etc. of something", "감소, 하락"],
+  ["annual", "adj. occurring each year", "연간의, 해마다의"],
+  ["wealthy", "adj. having a lot of money", "부유한"],
+  ["patent", "v. to acquire legal protection of an invention or idea", "특허를 받다"],
+  ["reveal", "v. to make something known", "드러내다, 밝히다"],
+  ["contribution", "n. an action taken to help something succeed", "기여, 공헌"],
+  ["genuinely", "adv. in a truthful way", "진심으로, 진짜로"],
+  ["excessive", "adj. more than is necessary", "과도한, 지나친"],
+  ["praise", "n. expressions of admiration or approval", "칭찬, 찬사"],
+  ["reward", "n. something given in return for an action", "보상"],
+  ["remarkable", "adj. special or surprising in a manner that grabs attention", "놀라운, 주목할 만한"],
+  ["modest", "adj. not interested in bragging about one's own achievements or abilities", "겸손한"]
+];
+
+let cards = [...rawData];
+let idx = 0;
+let isBack = false;
+
+function render() {
+  const [word, def, kor] = cards[idx];
+  const badge = document.getElementById("sideBadge");
+  const text = document.getElementById("cardText");
+  document.getElementById("counter").textContent = `${idx + 1} / ${cards.length}`;
+  document.getElementById("hintText").textContent = "";
+
+  if (!isBack) {
+    badge.textContent = "영영풀이 (앞면)";
+    badge.className = "badge";
+    text.textContent = def;
+    text.className = "content";
+  } else {
+    badge.textContent = "영단어 (뒷면)";
+    badge.className = "badge back";
+    text.textContent = word;
+    text.className = "content word";
+  }
+}
+
+function flipCard() { isBack = !isBack; render(); }
+function nextCard() { idx = (idx + 1) % cards.length; isBack = false; render(); }
+function prevCard() { idx = (idx - 1 + cards.length) % cards.length; isBack = false; render(); }
+function showHint(e) { e.stopPropagation(); document.getElementById("hintText").textContent = `뜻: ${cards[idx][2]}`; }
+function shuffleCards() { cards.sort(() => Math.random() - 0.5); idx = 0; isBack = false; render(); }
+
+render();
+</script>
+</body>
+</html>
